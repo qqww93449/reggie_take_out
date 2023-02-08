@@ -56,5 +56,5 @@ mybatis-plus:
 
 
 reggie:
-#  path: /usr/local/reggie_images/
-  path: E:/reggie/
+  path: /usr/local/img/
+#  path: E:/reggie/
