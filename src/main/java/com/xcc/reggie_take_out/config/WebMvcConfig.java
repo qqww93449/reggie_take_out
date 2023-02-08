@@ -1,12 +1,21 @@
 package com.xcc.reggie_take_out.config;
 
+import com.github.xiaoymin.knife4j.spring.annotations.EnableKnife4j;
 import com.xcc.reggie_take_out.common.JacksonObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import springfox.documentation.builders.ApiInfoBuilder;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.List;
 
@@ -18,6 +27,8 @@ import java.util.List;
 
 @Slf4j
 @Configuration
+@EnableSwagger2
+@EnableKnife4j
 public class WebMvcConfig extends WebMvcConfigurationSupport {
 
     /**
@@ -30,6 +41,8 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
     @Override
     protected void addResourceHandlers(ResourceHandlerRegistry registry) {
         log.info("开始进行静态资源映射");
+        registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
         registry.addResourceHandler("/backend/**").addResourceLocations("classpath:/backend/");
         registry.addResourceHandler("/front/**").addResourceLocations("classpath:/front/");
     }
@@ -52,7 +65,24 @@ public class WebMvcConfig extends WebMvcConfigurationSupport {
         //转换器是有优先级顺序的，这里我们把自己定义的消息转换器设置为第一优先级，所以会优先使用我们的转换器来进行相关数据进行转换
         // ，如果我们的转换器没有匹配到相应的数据来转换，那么就会去寻找第二个优先级的转换器，以此类推
         converters.add(0,messageConverter);
+    }
+    @Bean
+    public Docket createRestApi() {
+        // 文档类型
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.xcc.reggie_take_out.controller"))
+                .paths(PathSelectors.any())
+                .build();
+    }
 
-
+    private ApiInfo apiInfo() {
+        return new ApiInfoBuilder()
+                .title("瑞吉外卖")
+                .version("1.0")
+                .description("瑞吉外卖接口文档")
+                .build();
     }
 }
+
